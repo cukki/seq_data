@@ -96,6 +96,22 @@
             transition: all 0.3s;
         }
 
+        .scan-overlay::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #34C759, transparent);
+            animation: scan-line 2s linear infinite;
+        }
+
+        @keyframes scan-line {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
         .scan-overlay.detected {
             border-color: #34C759;
             border-width: 5px;
@@ -106,6 +122,10 @@
             animation: pulse 0.5s;
         }
 
+        .scan-overlay.detected::before {
+            display: none;
+        }
+
         @keyframes pulse {
             0%, 100% { transform: translate(-50%, -50%) scale(1); }
             50% { transform: translate(-50%, -50%) scale(1.05); }
@@ -113,18 +133,20 @@
 
         .scan-text {
             position: absolute;
-            bottom: -50px;
+            bottom: -60px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(52, 199, 89, 0.95);
             color: white;
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 20px;
             font-size: 14px;
             font-weight: bold;
-            white-space: nowrap;
+            max-width: 90%;
+            text-align: center;
             opacity: 0;
             transition: opacity 0.3s;
+            word-break: break-word;
         }
 
         .scan-overlay.detected .scan-text {
@@ -141,6 +163,7 @@
             padding: 10px 20px;
             border-radius: 20px;
             font-size: 14px;
+            text-align: center;
         }
 
         .result-panel {
@@ -196,6 +219,41 @@
             border-radius: 8px;
             font-size: 13px;
         }
+
+        .corner {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-color: #34C759;
+        }
+
+        .corner-tl {
+            top: -3px;
+            left: -3px;
+            border-top: 4px solid;
+            border-left: 4px solid;
+        }
+
+        .corner-tr {
+            top: -3px;
+            right: -3px;
+            border-top: 4px solid;
+            border-right: 4px solid;
+        }
+
+        .corner-bl {
+            bottom: -3px;
+            left: -3px;
+            border-bottom: 4px solid;
+            border-left: 4px solid;
+        }
+
+        .corner-br {
+            bottom: -3px;
+            right: -3px;
+            border-bottom: 4px solid;
+            border-right: 4px solid;
+        }
     </style>
 </head>
 <body>
@@ -203,7 +261,7 @@
         <div class="header">
             <h1>🎯 Szita Szekvencia Ellenőrző</h1>
             <div class="button-group">
-                <button id="scanBtn">📷 Scan Start</button>
+                <button id="scanBtn">📷 QR Scan</button>
                 <button id="resetBtn">🔄 Reset</button>
             </div>
         </div>
@@ -211,21 +269,25 @@
         <div class="video-wrapper" id="videoWrapper">
             <video id="video" playsinline></video>
             <div class="scan-overlay" id="scanOverlay">
-                <div class="scan-text" id="scanText">Kód felismerve!</div>
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
+                <div class="scan-text" id="scanText"></div>
             </div>
-            <div class="help-text">Célozd a DataMatrix kódot a négyzetbe</div>
+            <div class="help-text">Célozd a QR kódot a keretbe 📱</div>
         </div>
 
         <div class="result-panel">
             <div id="statusBox" class="status-box status-info">
-                <h2>Várj a beolvasásra</h2>
-                <p>Nyomd meg a Scan Start gombot.</p>
+                <h2>Kész az indításra</h2>
+                <p>Nyomd meg a QR Scan gombot és olvasd be a QR kódot. Formátum: <strong>Bopla 7545.01 222</strong></p>
             </div>
         </div>
     </div>
 
     <script>
-        const codeReader = new ZXing.BrowserMultiFormatReader();
+        const codeReader = new ZXing.BrowserQRCodeReader();
         const video = document.getElementById('video');
         const videoWrapper = document.getElementById('videoWrapper');
         const scanOverlay = document.getElementById('scanOverlay');
@@ -243,6 +305,8 @@
             
             const prefix = parts.slice(0, -1).join(' ');
             const sequence = parts[parts.length - 1];
+            
+            if (isNaN(sequence)) return null;
             
             return { prefix, sequence: parseInt(sequence), fullText: text };
         }
@@ -275,7 +339,8 @@
             videoWrapper.classList.remove('active');
             scanOverlay.classList.remove('detected');
             isScanning = false;
-            scanBtn.textContent = '📷 Scan Start';
+            scanBtn.textContent = '📷 QR Scan';
+            codeReader.reset();
         }
 
         scanBtn.addEventListener('click', async () => {
@@ -307,20 +372,27 @@
                         scanOverlay.classList.add('detected');
                         scanText.textContent = scannedText;
                         
+                        // Rezgés
                         if (navigator.vibrate) {
                             navigator.vibrate([100, 50, 100]);
                         }
                         
+                        // Hang lejátszása (opcionális)
+                        try {
+                            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGGm98OScTgwOUKru8LljHQU2jtrz1oAqBSl+zPLaizsKFGS46+uoVBMLR6Hh8r1sIAUrlc3y2og2CBhqvvDknE4MDU+p7vC5Yx0GN4/a89aAKgUpfszy2os7ChRluOvrrFMUDEig4fK9bCAEK5XN8tqJNggYa77w5JxODA1Pqe7wuWMdBjCP2vPXgCoFKX/M8tyLOwsVZbjr661TFAxIoOHyvm0gBSuVzfLaiTcIGGq+8OSbThAMUKnu8LljHQU2j9rz1oAqBSh/zPLcizsKFGS46+utUxQLSKDh8r5tIAUrlc3y2Yk2CBlqvvDknE4MDlCp7vC5Yx0FNo/a89aAKgUpfszy3Is7ChRluOvrq1MVDEY');
+                            audio.play().catch(() => {});
+                        } catch(e) {}
+                        
                         setTimeout(() => {
                             processScannedCode(scannedText);
                             stopCamera();
-                        }, 800);
+                        }, 1000);
                     }
                 });
 
             } catch (err) {
                 console.error('Kamera hiba:', err);
-                showStatus('error', 'Kamera hiba', 'Nem sikerült elindítani a kamerát!');
+                showStatus('error', 'Kamera hiba', 'Nem sikerült elindítani a kamerát! Engedélyezd a kamera hozzáférést.');
                 stopCamera();
             }
         });
@@ -329,7 +401,7 @@
             const parsed = parseCode(text);
             
             if (!parsed) {
-                showStatus('error', 'Hibás formátum', `Nem megfelelő formátum:<br><strong>${text}</strong>`);
+                showStatus('error', 'Hibás formátum', `A QR kód tartalma nem megfelelő:<br><strong>${text}</strong><br><br>Helyes formátum: <strong>Bopla 7545.01 222</strong>`);
                 return;
             }
 
@@ -338,7 +410,7 @@
             if (!lastData || lastData.prefix !== parsed.prefix) {
                 localStorage.setItem('lastScan', JSON.stringify(parsed));
                 showStatus('success', 'Első beolvasás ✅', 
-                    `<strong>${parsed.fullText}</strong><br>Első vagy új sorozat.`,
+                    `<strong>${parsed.fullText}</strong><br><br>Ez az első beolvasás vagy új sorozat kezdete.`,
                     parsed.fullText);
                 return;
             }
@@ -347,28 +419,29 @@
             
             if (parsed.sequence === expected) {
                 localStorage.setItem('lastScan', JSON.stringify(parsed));
-                showStatus('success', 'Helyes! ✅', 
-                    `<strong>${parsed.fullText}</strong><br>${lastData.sequence} → ${parsed.sequence}`,
+                showStatus('success', 'Helyes szekvencia! ✅', 
+                    `<strong>${parsed.fullText}</strong><br><br>Előző: ${lastData.sequence} → Jelenlegi: ${parsed.sequence}<br>Folytatás rendben!`,
                     parsed.fullText);
             } else {
-                showStatus('error', 'Hiba! ❌', 
-                    `Várt: <strong>${parsed.prefix} ${expected}</strong><br>Kapott: <strong>${parsed.fullText}</strong>`,
+                showStatus('error', 'Szekvencia hiba! ❌', 
+                    `<strong>Várt:</strong> ${parsed.prefix} ${expected}<br><strong>Kapott:</strong> ${parsed.fullText}<br><br>⚠️ A szekvencia megszakadt!`,
                     `Utolsó helyes: ${lastData.fullText}`);
             }
         }
 
         resetBtn.addEventListener('click', () => {
-            if (confirm('Reset?')) {
+            if (confirm('Biztosan törölni szeretnéd a mentett adatokat?')) {
                 localStorage.removeItem('lastScan');
                 stopCamera();
-                showStatus('info', 'Reset kész', 'Új sorozat indítható.');
+                showStatus('info', 'Reset kész ✓', 'Minden adat törölve. Új sorozat indítható!');
             }
         });
 
+        // Init
         const savedData = JSON.parse(localStorage.getItem('lastScan') || 'null');
         if (savedData) {
             showStatus('info', 'Folytatás', 
-                `Utolsó: <strong>${savedData.fullText}</strong><br>Következő: <strong>${savedData.sequence + 1}</strong>`,
+                `Utolsó beolvasott: <strong>${savedData.fullText}</strong><br><br>Következő várható: <strong>${savedData.prefix} ${savedData.sequence + 1}</strong>`,
                 savedData.fullText);
         }
     </script>
