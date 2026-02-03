@@ -287,7 +287,7 @@
     </div>
 
     <script>
-        const codeReader = new ZXing.BrowserQRCodeReader();
+        let codeReader = null;
         const video = document.getElementById('video');
         const videoWrapper = document.getElementById('videoWrapper');
         const scanOverlay = document.getElementById('scanOverlay');
@@ -336,11 +336,14 @@
                 currentStream.getTracks().forEach(track => track.stop());
                 currentStream = null;
             }
+            if (codeReader) {
+                codeReader.reset();
+                codeReader = null;
+            }
             videoWrapper.classList.remove('active');
             scanOverlay.classList.remove('detected');
             isScanning = false;
             scanBtn.textContent = '📷 QR Scan';
-            codeReader.reset();
         }
 
         scanBtn.addEventListener('click', async () => {
@@ -353,6 +356,9 @@
                 isScanning = true;
                 scanBtn.textContent = '⏹️ Stop';
                 videoWrapper.classList.add('active');
+                
+                // Új reader példány minden indításkor
+                codeReader = new ZXing.BrowserQRCodeReader();
                 
                 currentStream = await navigator.mediaDevices.getUserMedia({ 
                     video: { 
@@ -433,7 +439,7 @@
             if (confirm('Biztosan törölni szeretnéd a mentett adatokat?')) {
                 localStorage.removeItem('lastScan');
                 stopCamera();
-                showStatus('info', 'Reset kész ✓', 'Minden adat törölve. Új sorozat indítható!');
+                showStatus('info', 'Adatok törölve', 'Nyomd meg a QR Scan gombot az új sorozat indításához.');
             }
         });
 
