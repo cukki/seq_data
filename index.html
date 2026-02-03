@@ -18,7 +18,9 @@
             background: #f5f5f5;
             min-height: 100vh;
         }
-
+button, input, select, textarea {
+    font-family: 'Outfit', sans-serif;
+}
         .container {
             max-width: 600px;
             margin: 0 auto;
@@ -215,38 +217,58 @@
             `;
         }
 
-        function processScannedCode(text) {
-            const parsed = parseCode(text);
-            
-            if (!parsed) {
-                showStatus('error', 'Hibás formátum', `A QR kód utolsó 3 karaktere nem megfelelő:<br><strong>${text}</strong><br><br>Az utolsó 3 karakter szám kell legyen (min. 221).`);
-                return;
-            }
+function parseCode(text) {
+    const trimmed = text.trim();
+    
+    // Utolsó 3 karakter kiválasztása
+    if (trimmed.length < 3) return null;
+    
+    const last3 = trimmed.slice(-3);
+    const sequence = parseInt(last3);
+    
+    // Ellenőrizzük hogy szám-e
+    if (isNaN(sequence)) return null;
+    
+    return { sequence: sequence, fullText: trimmed };
+}
 
-            const lastData = JSON.parse(localStorage.getItem('lastScan') || 'null');
+function processScannedCode(text) {
+    const parsed = parseCode(text);
+    
+    if (!parsed) {
+        showStatus('error', 'Hibás formátum', `A QR kód utolsó 3 karaktere nem szám:<br><strong>${text}</strong>`);
+        return;
+    }
 
-            // Első beolvasás
-            if (!lastData) {
-                localStorage.setItem('lastScan', JSON.stringify(parsed));
-                showStatus('success', 'Első beolvasás ✅', 
-                    `<strong>${parsed.fullText}</strong><br><br>Szekvencia: <strong>${parsed.sequence}</strong><br>Ez az első beolvasás.`,
-                    parsed.fullText);
-                return;
-            }
+    const lastData = JSON.parse(localStorage.getItem('lastScan') || 'null');
 
-            const expected = lastData.sequence + 1;
-            
-            if (parsed.sequence === expected) {
-                localStorage.setItem('lastScan', JSON.stringify(parsed));
-                showStatus('success', 'Helyes szekvencia! ✅', 
-                    `<strong>${parsed.fullText}</strong><br><br>Előző: ${lastData.sequence} → Jelenlegi: ${parsed.sequence}`,
-                    parsed.fullText);
-            } else {
-                showStatus('error', 'Szekvencia hiba! ❌', 
-                    `<strong>Várt:</strong> ...${expected}<br><strong>Kapott:</strong> ${parsed.fullText} (${parsed.sequence})<br><br>⚠️ A szekvencia megszakadt!`,
-                    `Utolsó helyes: ${lastData.fullText}`);
-            }
+    // Első beolvasás - CSAK 221 vagy 222
+    if (!lastData) {
+        if (parsed.sequence === 221 || parsed.sequence === 222) {
+            localStorage.setItem('lastScan', JSON.stringify(parsed));
+            showStatus('success', 'Első beolvasás ✅', 
+                `<strong>${parsed.fullText}</strong><br><br>Szekvencia: <strong>${parsed.sequence}</strong><br>Sorozat elindítva.`,
+                parsed.fullText);
+        } else {
+            showStatus('error', 'Hibás kezdő érték! ❌', 
+                `<strong>${parsed.fullText}</strong> (${parsed.sequence})<br><br>Az első beolvasás <strong>221</strong> vagy <strong>222</strong> kell legyen!`);
         }
+        return;
+    }
+
+    const expected = lastData.sequence + 1;
+    
+    if (parsed.sequence === expected) {
+        localStorage.setItem('lastScan', JSON.stringify(parsed));
+        showStatus('success', 'Helyes szekvencia! ✅', 
+            `<strong>${parsed.fullText}</strong><br><br>Előző: ${lastData.sequence} → Jelenlegi: ${parsed.sequence}`,
+            parsed.fullText);
+    } else {
+        showStatus('error', 'Szekvencia hiba! ❌', 
+            `<strong>Várt:</strong> ...${expected}<br><strong>Kapott:</strong> ${parsed.fullText} (${parsed.sequence})<br><br>⚠️ A szekvencia megszakadt!`,
+            `Utolsó helyes: ${lastData.fullText}`);
+    }
+}
 
         scanBtn.addEventListener('click', async () => {
             if (isScanning) {
