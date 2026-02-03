@@ -14,49 +14,51 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-            background: #f5f5f5;
-            padding: 20px;
+            background: #000;
             min-height: 100vh;
+            overflow: hidden;
         }
 
         .container {
-            max-width: 600px;
-            margin: 0 auto;
+            max-width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        h1 {
+        .header {
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            color: white;
             text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 24px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            margin-bottom: 10px;
         }
 
         .button-group {
             display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 10px;
+            justify-content: center;
         }
 
         button {
-            flex: 1;
-            padding: 18px;
-            font-size: 18px;
+            padding: 12px 24px;
+            font-size: 16px;
             font-weight: bold;
             border: none;
-            border-radius: 12px;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         #scanBtn {
-            background: #007AFF;
+            background: #34C759;
             color: white;
-        }
-
-        #scanBtn:active {
-            background: #0051D5;
-            transform: scale(0.98);
         }
 
         #resetBtn {
@@ -64,40 +66,95 @@
             color: white;
         }
 
-        #resetBtn:active {
-            background: #D70015;
-            transform: scale(0.98);
-        }
-
-        .video-container {
+        .video-wrapper {
+            flex: 1;
             position: relative;
             display: none;
-            margin-bottom: 20px;
+            background: #000;
         }
 
-        .video-container.active {
+        .video-wrapper.active {
             display: block;
         }
 
         #video {
             width: 100%;
-            max-width: 100%;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transition: border 0.3s;
+            height: 100%;
+            object-fit: cover;
         }
 
-        #video.detected {
-            border: 5px solid #34C759;
-            box-shadow: 0 0 20px rgba(52, 199, 89, 0.5);
+        .scan-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            border: 3px solid rgba(52, 199, 89, 0.6);
+            border-radius: 12px;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s;
+        }
+
+        .scan-overlay.detected {
+            border-color: #34C759;
+            border-width: 5px;
+            box-shadow: 
+                0 0 0 9999px rgba(0, 0, 0, 0.3),
+                0 0 30px rgba(52, 199, 89, 0.8),
+                inset 0 0 30px rgba(52, 199, 89, 0.3);
+            animation: pulse 0.5s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        .scan-text {
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(52, 199, 89, 0.95);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .scan-overlay.detected .scan-text {
+            opacity: 1;
+        }
+
+        .help-text {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .result-panel {
+            background: #f5f5f5;
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
         }
 
         .status-box {
-            margin-top: 20px;
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: all 0.3s;
+            margin-bottom: 15px;
         }
 
         .status-success {
@@ -117,117 +174,79 @@
         }
 
         .status-box h2 {
-            font-size: 20px;
-            margin-bottom: 10px;
+            font-size: 18px;
+            margin-bottom: 8px;
         }
 
         .status-box p {
-            font-size: 16px;
+            font-size: 14px;
             line-height: 1.5;
         }
 
         .checkmark {
-            font-size: 48px;
+            font-size: 36px;
             text-align: center;
             margin-bottom: 10px;
         }
 
         #lastScanned {
-            margin-top: 15px;
-            padding: 15px;
+            margin-top: 10px;
+            padding: 12px;
             background: rgba(255,255,255,0.2);
             border-radius: 8px;
-            font-size: 14px;
-        }
-
-        #debugInfo {
-            margin-top: 20px;
-            padding: 15px;
-            background: #fff;
-            border-radius: 8px;
-            font-size: 12px;
-            color: #666;
-            border: 1px solid #ddd;
-            font-family: monospace;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 20px;
-            }
-            
-            button {
-                padding: 15px;
-                font-size: 16px;
-            }
-            
-            .status-box h2 {
-                font-size: 18px;
-            }
+            font-size: 13px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎯 Szita Szekvencia Ellenőrző</h1>
-        
-        <div class="button-group">
-            <button id="scanBtn">📷 Beolvasás</button>
-            <button id="resetBtn">🔄 Reset</button>
+        <div class="header">
+            <h1>🎯 Szita Szekvencia Ellenőrző</h1>
+            <div class="button-group">
+                <button id="scanBtn">📷 Scan Start</button>
+                <button id="resetBtn">🔄 Reset</button>
+            </div>
         </div>
 
-        <div class="video-container" id="videoContainer">
+        <div class="video-wrapper" id="videoWrapper">
             <video id="video" playsinline></video>
+            <div class="scan-overlay" id="scanOverlay">
+                <div class="scan-text" id="scanText">Kód felismerve!</div>
+            </div>
+            <div class="help-text">Célozd a DataMatrix kódot a négyzetbe</div>
         </div>
 
-        <div id="statusBox" class="status-box status-info">
-            <h2>Várj a beolvasásra</h2>
-            <p>Nyomd meg a Beolvasás gombot és célozd meg a DataMatrix kódot.</p>
+        <div class="result-panel">
+            <div id="statusBox" class="status-box status-info">
+                <h2>Várj a beolvasásra</h2>
+                <p>Nyomd meg a Scan Start gombot.</p>
+            </div>
         </div>
-
-        <div id="debugInfo"></div>
     </div>
 
     <script>
         const codeReader = new ZXing.BrowserMultiFormatReader();
         const video = document.getElementById('video');
-        const videoContainer = document.getElementById('videoContainer');
+        const videoWrapper = document.getElementById('videoWrapper');
+        const scanOverlay = document.getElementById('scanOverlay');
+        const scanText = document.getElementById('scanText');
         const scanBtn = document.getElementById('scanBtn');
         const resetBtn = document.getElementById('resetBtn');
         const statusBox = document.getElementById('statusBox');
-        const debugInfo = document.getElementById('debugInfo');
         
         let isScanning = false;
         let currentStream = null;
-        let scanCount = 0;
 
-        // Debug log
-        function addDebug(msg) {
-            const time = new Date().toLocaleTimeString();
-            debugInfo.innerHTML += `[${time}] ${msg}<br>`;
-            debugInfo.scrollTop = debugInfo.scrollHeight;
-            console.log(msg);
-        }
-
-        // Parse DataMatrix szöveg
         function parseCode(text) {
-            addDebug(`📥 Beolvasott szöveg: "${text}"`);
             const parts = text.trim().split(/\s+/);
-            if (parts.length < 3) {
-                addDebug(`❌ Hibás formátum: kevesebb mint 3 rész`);
-                return null;
-            }
+            if (parts.length < 3) return null;
             
             const prefix = parts.slice(0, -1).join(' ');
             const sequence = parts[parts.length - 1];
             
-            addDebug(`✅ Prefix: "${prefix}", Szekvencia: "${sequence}"`);
-            return { prefix, sequence: parseInt(sequence) };
+            return { prefix, sequence: parseInt(sequence), fullText: text };
         }
 
-        // Státusz megjelenítés
         function showStatus(type, title, message, lastCode = null) {
             statusBox.className = `status-box status-${type}`;
             
@@ -237,7 +256,7 @@
             
             let lastInfo = '';
             if (lastCode) {
-                lastInfo = `<div id="lastScanned"><strong>Utolsó beolvasott:</strong> ${lastCode}</div>`;
+                lastInfo = `<div id="lastScanned"><strong>Beolvasva:</strong> ${lastCode}</div>`;
             }
             
             statusBox.innerHTML = `
@@ -248,20 +267,17 @@
             `;
         }
 
-        // Kamera stop
         function stopCamera() {
             if (currentStream) {
                 currentStream.getTracks().forEach(track => track.stop());
                 currentStream = null;
             }
-            videoContainer.classList.remove('active');
-            video.classList.remove('detected');
+            videoWrapper.classList.remove('active');
+            scanOverlay.classList.remove('detected');
             isScanning = false;
-            scanBtn.textContent = '📷 Beolvasás';
-            addDebug('📷 Kamera leállítva');
+            scanBtn.textContent = '📷 Scan Start';
         }
 
-        // Scan indítás
         scanBtn.addEventListener('click', async () => {
             if (isScanning) {
                 stopCamera();
@@ -270,13 +286,9 @@
 
             try {
                 isScanning = true;
-                scanBtn.textContent = '⏹️ Leállítás';
-                videoContainer.classList.add('active');
+                scanBtn.textContent = '⏹️ Stop';
+                videoWrapper.classList.add('active');
                 
-                showStatus('info', 'Kamera indítás...', 'Célozd meg a DataMatrix kódot közelről!');
-                addDebug('🎥 Kamera indítása...');
-
-                // Kamera stream indítás
                 currentStream = await navigator.mediaDevices.getUserMedia({ 
                     video: { 
                         facingMode: 'environment',
@@ -285,103 +297,79 @@
                     } 
                 });
                 video.srcObject = currentStream;
-                video.play();
-                addDebug('✅ Kamera elindult');
+                await video.play();
 
-                // Folyamatos olvasás
                 codeReader.decodeFromVideoElement(video, (result, err) => {
                     if (result) {
-                        scanCount++;
-                        addDebug(`🎯 Kód észlelve! (#${scanCount})`);
-                        
-                        // Zöld keret
-                        video.classList.add('detected');
-                        
-                        // Rezgés (ha támogatott)
-                        if (navigator.vibrate) {
-                            navigator.vibrate(200);
-                        }
-                        
                         const scannedText = result.text;
                         
-                        // 500ms múlva feldolgozás és leállítás
+                        // Vizuális feedback
+                        scanOverlay.classList.add('detected');
+                        scanText.textContent = scannedText;
+                        
+                        if (navigator.vibrate) {
+                            navigator.vibrate([100, 50, 100]);
+                        }
+                        
                         setTimeout(() => {
                             processScannedCode(scannedText);
                             stopCamera();
-                        }, 500);
-                    }
-                    
-                    if (err && !(err instanceof ZXing.NotFoundException)) {
-                        addDebug(`⚠️ Olvasási hiba: ${err.message}`);
+                        }, 800);
                     }
                 });
 
             } catch (err) {
                 console.error('Kamera hiba:', err);
-                addDebug(`❌ HIBA: ${err.message}`);
-                showStatus('error', 'Kamera hiba', 'Nem sikerült elindítani a kamerát. Ellenőrizd az engedélyeket!');
+                showStatus('error', 'Kamera hiba', 'Nem sikerült elindítani a kamerát!');
                 stopCamera();
             }
         });
 
-        // Beolvasott kód feldolgozás
         function processScannedCode(text) {
             const parsed = parseCode(text);
             
             if (!parsed) {
-                showStatus('error', 'Hibás formátum', `A beolvasott szöveg nem megfelelő formátumú:<br><strong>${text}</strong>`);
+                showStatus('error', 'Hibás formátum', `Nem megfelelő formátum:<br><strong>${text}</strong>`);
                 return;
             }
 
             const lastData = JSON.parse(localStorage.getItem('lastScan') || 'null');
 
-            // Első beolvasás VAGY új prefix
             if (!lastData || lastData.prefix !== parsed.prefix) {
                 localStorage.setItem('lastScan', JSON.stringify(parsed));
-                addDebug('🟢 Első scan vagy új sorozat');
-                showStatus('success', 'Első beolvasás', 
-                    `Szita: <strong>${parsed.prefix} ${parsed.sequence}</strong><br>Ez az első beolvasás vagy új sorozat kezdete.`,
-                    `${parsed.prefix} ${parsed.sequence}`);
+                showStatus('success', 'Első beolvasás ✅', 
+                    `<strong>${parsed.fullText}</strong><br>Első vagy új sorozat.`,
+                    parsed.fullText);
                 return;
             }
 
-            // Szekvencia ellenőrzés
             const expected = lastData.sequence + 1;
-            addDebug(`🔍 Ellenőrzés: várható=${expected}, kapott=${parsed.sequence}`);
             
             if (parsed.sequence === expected) {
                 localStorage.setItem('lastScan', JSON.stringify(parsed));
-                addDebug('🟢 Helyes szekvencia!');
-                showStatus('success', 'Helyes szekvencia! ✅', 
-                    `Szita: <strong>${parsed.prefix} ${parsed.sequence}</strong><br>Előző: ${lastData.sequence} → Jelenlegi: ${parsed.sequence}`,
-                    `${parsed.prefix} ${parsed.sequence}`);
+                showStatus('success', 'Helyes! ✅', 
+                    `<strong>${parsed.fullText}</strong><br>${lastData.sequence} → ${parsed.sequence}`,
+                    parsed.fullText);
             } else {
-                addDebug('🔴 Hibás szekvencia!');
-                showStatus('error', 'Szekvencia hiba! ❌', 
-                    `Várt: <strong>${parsed.prefix} ${expected}</strong><br>Kapott: <strong>${parsed.prefix} ${parsed.sequence}</strong><br><br>A szekvencia nem folytatódik!`,
-                    `Utolsó helyes: ${lastData.prefix} ${lastData.sequence}`);
+                showStatus('error', 'Hiba! ❌', 
+                    `Várt: <strong>${parsed.prefix} ${expected}</strong><br>Kapott: <strong>${parsed.fullText}</strong>`,
+                    `Utolsó helyes: ${lastData.fullText}`);
             }
         }
 
-        // Reset
         resetBtn.addEventListener('click', () => {
-            if (confirm('Biztosan törölni szeretnéd az összes mentett adatot?')) {
+            if (confirm('Reset?')) {
                 localStorage.removeItem('lastScan');
                 stopCamera();
-                debugInfo.innerHTML = '';
-                addDebug('🔄 Reset végrehajtva');
-                showStatus('info', 'Reset kész', 'Minden adat törölve. Kezdheted az új sorozatot!');
+                showStatus('info', 'Reset kész', 'Új sorozat indítható.');
             }
         });
 
-        // Init
-        addDebug('🚀 Alkalmazás betöltve');
         const savedData = JSON.parse(localStorage.getItem('lastScan') || 'null');
         if (savedData) {
-            addDebug(`💾 Mentett adat betöltve: ${savedData.prefix} ${savedData.sequence}`);
             showStatus('info', 'Folytatás', 
-                `Utolsó beolvasott szita: <strong>${savedData.prefix} ${savedData.sequence}</strong><br>Következő várható: <strong>${savedData.sequence + 1}</strong>`,
-                `${savedData.prefix} ${savedData.sequence}`);
+                `Utolsó: <strong>${savedData.fullText}</strong><br>Következő: <strong>${savedData.sequence + 1}</strong>`,
+                savedData.fullText);
         }
     </script>
 </body>
