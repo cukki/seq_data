@@ -192,7 +192,7 @@ button, input, select, textarea {
             const sequence = parseInt(last3);
             
             // Ellenőrizzük hogy szám-e és >= 221
-            if (isNaN(sequence) || sequence =< 221) return null;
+            if (isNaN(sequence) || sequence < 221) return null;
             
             return { sequence: sequence, fullText: trimmed };
         }
