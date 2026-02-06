@@ -517,25 +517,42 @@
     </script>
 
     <script>
-        // TAB SWITCHING
-        const tabs = document.querySelectorAll('.tab');
-        const tabContents = document.querySelectorAll('.tab-content');
+      // TAB SWITCHING - módosított verzió jelszóval
+const tabs = document.querySelectorAll('.tab');
+const tabContents = document.querySelectorAll('.tab-content');
 
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const targetTab = tab.dataset.tab;
-                
-                tabs.forEach(t => t.classList.remove('active'));
-                tabContents.forEach(tc => tc.classList.remove('active'));
-                
-                tab.classList.add('active');
-                document.getElementById(`${targetTab}-view`).classList.add('active');
+let isAuthenticated = false;
+const ADMIN_PASSWORD = "admin123";  
 
-                if (targetTab === 'list') {
-                    loadPairings();
-                }
-            });
-        });
+tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+        const targetTab = tab.dataset.tab;
+        
+        // Ha Lista tabra akar váltani, kér jelszót
+        if (targetTab === 'list' && !isAuthenticated) {
+            const password = prompt('🔒 Admin jelszó szükséges:');
+            
+            if (password !== ADMIN_PASSWORD) {
+                alert('❌ Hibás jelszó!');
+                return; // Nem vált tab-ot
+            }
+            
+            isAuthenticated = true;
+            alert('✅ Sikeres bejelentkezés!');
+        }
+        
+        // Tab váltás
+        tabs.forEach(t => t.classList.remove('active'));
+        tabContents.forEach(tc => tc.classList.remove('active'));
+        
+        tab.classList.add('active');
+        document.getElementById(`${targetTab}-view`).classList.add('active');
+
+        if (targetTab === 'list') {
+            loadPairings();
+        }
+    });
+});
 
         // SCAN TAB LOGIC
         const scanBtn = document.getElementById('scanBtn');
