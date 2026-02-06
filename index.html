@@ -22,10 +22,11 @@
         body {
             background: #f5f5f5;
             min-height: 100vh;
+            padding-bottom: 80px;
         }
 
         .container {
-            max-width: 600px;
+            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -37,13 +38,48 @@
             font-size: 24px;
         }
 
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #34C759;
+            border-bottom-color: #34C759;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* SCAN VIEW */
         .button-group {
             display: flex;
             gap: 15px;
             margin-bottom: 20px;
         }
 
-        button {
+        button:not(.tab) {
             flex: 1;
             padding: 18px;
             font-size: 18px;
@@ -173,33 +209,289 @@
         #reader__dashboard_section_csr > div:first-child {
             border: 3px solid #34C759 !important;
         }
+
+        /* LIST VIEW */
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-card.success .value {
+            color: #34C759;
+        }
+
+        .stat-card.error .value {
+            color: #FF3B30;
+        }
+
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .filters h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .filter-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-group input, .filter-group select {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-actions button {
+            padding: 12px 24px;
+            font-size: 14px;
+        }
+
+        #exportBtn {
+            background: #007AFF;
+            color: white;
+        }
+
+        #clearFiltersBtn {
+            background: #999;
+            color: white;
+        }
+
+        #refreshBtn {
+            background: #34C759;
+            color: white;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8f8f8;
+            position: sticky;
+            top: 0;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #ddd;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #f8f8f8;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.success {
+            background: #34C759;
+            color: white;
+        }
+
+        .status-badge.error {
+            background: #FF3B30;
+            color: white;
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            background: #007AFF;
+            color: white;
+        }
+
+        .action-btn.delete {
+            background: #FF3B30;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            .stat-card .value {
+                font-size: 24px;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 10px 8px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🎯 Szita-Művelet Párosító</h1>
         
-        <div class="button-group">
-            <button id="scanBtn">📷 Scan Start</button>
-            <button id="resetBtn">🔄 Reset</button>
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab active" data-tab="scan">📷 Scan</button>
+            <button class="tab" data-tab="list">📊 Lista</button>
         </div>
 
-        <div id="reader"></div>
+        <!-- SCAN TAB -->
+        <div id="scan-view" class="tab-content active">
+            <div class="button-group">
+                <button id="scanBtn">📷 Scan Start</button>
+                <button id="resetBtn">🔄 Reset</button>
+            </div>
 
-        <div id="statusBox" class="status-box status-info">
-            <h2>Kész az indításra</h2>
-            <p>Olvasd be a szitán található kódot (DataMatrix).<br>Első művelet: <strong>221</strong> vagy <strong>222</strong></p>
+            <div id="reader"></div>
+
+            <div id="statusBox" class="status-box status-info">
+                <h2>Kész az indításra</h2>
+                <p>Olvasd be a szitán található kódot (DataMatrix).<br>Első művelet: <strong>221</strong> vagy <strong>222</strong></p>
+            </div>
+
+            <div class="hint">💡 Tartsd 15-25 cm távolságra a kódot</div>
         </div>
 
-        <div class="hint">💡 Tartsd 15-25 cm távolságra a kódot</div>
+        <!-- LIST TAB -->
+        <div id="list-view" class="tab-content">
+            <div class="stats-panel">
+                <div class="stat-card">
+                    <h3>Összes párosítás</h3>
+                    <div class="value" id="totalCount">0</div>
+                </div>
+                <div class="stat-card success">
+                    <h3>Sikeres</h3>
+                    <div class="value" id="successCount">0</div>
+                </div>
+                <div class="stat-card error">
+                    <h3>Hibás</h3>
+                    <div class="value" id="errorCount">0</div>
+                </div>
+            </div>
+
+            <div class="filters">
+                <h3>Szűrők</h3>
+                <div class="filter-group">
+                    <input type="date" id="filterDate" placeholder="Dátum">
+                    <input type="text" id="filterMunka" placeholder="Munka ID">
+                    <input type="text" id="filterMegrendeles" placeholder="Megrendelés ID">
+                    <select id="filterStatus">
+                        <option value="">Minden státusz</option>
+                        <option value="success">Sikeres</option>
+                        <option value="error">Hibás</option>
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button id="refreshBtn">🔄 Frissítés</button>
+                    <button id="exportBtn">📥 Excel Export</button>
+                    <button id="clearFiltersBtn">✖️ Szűrők törlése</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div id="loadingState" class="loading">
+                    <p>⏳ Adatok betöltése...</p>
+                </div>
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <h3>📭 Nincs még párosítás</h3>
+                    <p>Kezdj el párosításokat rögzíteni a Scan fülön!</p>
+                </div>
+                <table id="pairingsTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Dátum/Idő</th>
+                            <th>Munka</th>
+                            <th>Megrendelés</th>
+                            <th>Művelet</th>
+                            <th>Státusz</th>
+                            <th>Műveletek</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- Firebase -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js';
-        import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, deleteDoc, doc, onSnapshot } from 'https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js';
 
-        // ⚠️ IDE ILLESZD BE A SAJÁT FIREBASE CONFIG-OT!
         const firebaseConfig = {
             apiKey: "AIzaSyBaR5GoAtSdG9rfonPxPicxU1qCjkn4HkI",
             authDomain: "timemonitoring-ku.firebaseapp.com",
@@ -215,9 +507,37 @@
         window.db = db;
         window.addDoc = addDoc;
         window.collection = collection;
+        window.query = query;
+        window.orderBy = orderBy;
+        window.limit = limit;
+        window.getDocs = getDocs;
+        window.deleteDoc = deleteDoc;
+        window.doc = doc;
+        window.onSnapshot = onSnapshot;
     </script>
 
     <script>
+        // TAB SWITCHING
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.dataset.tab;
+                
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(tc => tc.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`${targetTab}-view`).classList.add('active');
+
+                if (targetTab === 'list') {
+                    loadPairings();
+                }
+            });
+        });
+
+        // SCAN TAB LOGIC
         const scanBtn = document.getElementById('scanBtn');
         const resetBtn = document.getElementById('resetBtn');
         const statusBox = document.getElementById('statusBox');
@@ -226,16 +546,14 @@
         let html5QrCode = null;
         let isScanning = false;
         
-        // Állapot kezelés
         let state = {
-            phase: 'WAITING_DATAMATRIX',  // WAITING_DATAMATRIX | WAITING_CODE128 | IDLE
+            phase: 'WAITING_DATAMATRIX',
             datamatrix: null,
             munka_id: null,
             lastSequence: null,
             startTime: null
         };
 
-        // Parse DataMatrix
         function parseDataMatrix(text) {
             const trimmed = text.trim();
             if (trimmed.length < 3) return null;
@@ -247,14 +565,9 @@
             
             const munka_id = trimmed.slice(0, -3).trim();
             
-            return { 
-                munka_id, 
-                muvelet_id, 
-                fullText: trimmed 
-            };
+            return { munka_id, muvelet_id, fullText: trimmed };
         }
 
-        // Parse Code128
         function parseCode128(text) {
             const trimmed = text.trim();
             if (trimmed.length < 3) return null;
@@ -266,11 +579,7 @@
             
             const megrendeles_id = trimmed.slice(0, -3);
             
-            return { 
-                megrendeles_id, 
-                muvelet_id, 
-                fullText: trimmed 
-            };
+            return { megrendeles_id, muvelet_id, fullText: trimmed };
         }
 
         function showStatus(type, title, message, details = null) {
@@ -286,12 +595,7 @@
                 detailsHTML = `<div class="detail-info">${details}</div>`;
             }
             
-            statusBox.innerHTML = `
-                ${icon}
-                <h2>${title}</h2>
-                <p>${message}</p>
-                ${detailsHTML}
-            `;
+            statusBox.innerHTML = `${icon}<h2>${title}</h2><p>${message}</p>${detailsHTML}`;
         }
 
         async function logToFirebase(data) {
@@ -315,7 +619,6 @@
                 return;
             }
 
-            // Első beolvasás ellenőrzés
             if (state.lastSequence === null) {
                 if (parsed.muvelet_id !== 221 && parsed.muvelet_id !== 222) {
                     showStatus('error', 'Hibás kezdő művelet!', 
@@ -323,7 +626,6 @@
                     return;
                 }
             } else {
-                // Szekvencia ellenőrzés
                 const expected = state.lastSequence + 1;
                 if (parsed.muvelet_id !== expected) {
                     showStatus('error', 'Szekvencia hiba!', 
@@ -332,7 +634,6 @@
                 }
             }
 
-            // DataMatrix mentése
             state.datamatrix = parsed;
             state.munka_id = parsed.munka_id;
             state.phase = 'WAITING_CODE128';
@@ -352,7 +653,6 @@
                 return;
             }
 
-            // Match ellenőrzés
             if (parsed.muvelet_id !== state.datamatrix.muvelet_id) {
                 const details = `<strong>DataMatrix művelet:</strong> ${state.datamatrix.muvelet_id}<br>` +
                                `<strong>Code128 művelet:</strong> ${parsed.muvelet_id}<br>` +
@@ -371,13 +671,11 @@
                 showStatus('error', 'Művelet nem egyezik! ❌', 
                     `A DataMatrix és Code128 művelet száma eltér!`, details);
                 
-                // Reset DataMatrix, új párosítás kell
                 state.phase = 'WAITING_DATAMATRIX';
                 state.datamatrix = null;
                 return;
             }
 
-            // Sikeres párosítás
             const elapsedTime = Math.round((new Date() - state.startTime) / 1000);
             
             await logToFirebase({
@@ -399,7 +697,6 @@
                 `A két kód sikeresen össze lett párosítva.<br><br>Következő művelet: <strong>${state.datamatrix.muvelet_id + 1}</strong><br>Olvasd be a szitán található kódot.`,
                 details);
 
-            // Következő szekvencia
             state.lastSequence = state.datamatrix.muvelet_id;
             state.phase = 'WAITING_DATAMATRIX';
             state.datamatrix = null;
@@ -495,6 +792,216 @@
                 
                 showStatus('info', 'Reset kész', 'Olvasd be a szitán található kódot (DataMatrix).<br>Első művelet: <strong>221</strong> vagy <strong>222</strong>');
             }
+        });
+
+        // LIST TAB LOGIC
+        let allPairings = [];
+        let filteredPairings = [];
+
+        async function loadPairings() {
+            const loadingState = document.getElementById('loadingState');
+            const emptyState = document.getElementById('emptyState');
+            const table = document.getElementById('pairingsTable');
+
+            loadingState.style.display = 'block';
+            emptyState.style.display = 'none';
+            table.style.display = 'none';
+
+            try {
+                const q = window.query(
+                    window.collection(window.db, 'pairings'),
+                    window.orderBy('timestamp', 'desc'),
+                    window.limit(100)
+                );
+
+                const snapshot = await window.getDocs(q);
+                allPairings = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                filteredPairings = [...allPairings];
+                renderTable();
+                updateStats();
+
+                loadingState.style.display = 'none';
+                
+                if (allPairings.length === 0) {
+                    emptyState.style.display = 'block';
+                } else {
+                    table.style.display = 'table';
+                }
+
+            } catch (error) {
+                console.error('Hiba a betöltés során:', error);
+                loadingState.innerHTML = '<p>❌ Hiba történt az adatok betöltése során</p>';
+            }
+        }
+
+        function updateStats() {
+            const total = filteredPairings.length;
+            const success = filteredPairings.filter(p => p.match_status === 'success').length;
+            const error = filteredPairings.filter(p => p.match_status === 'error').length;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('successCount').textContent = success;
+            document.getElementById('errorCount').textContent = error;
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return '-';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            return date.toLocaleString('hu-HU', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            filteredPairings.forEach(pairing => {
+                const row = document.createElement('tr');
+                
+                const statusBadge = pairing.match_status === 'success' 
+                    ? '<span class="status-badge success">✅ Sikeres</span>'
+                    : '<span class="status-badge error">❌ Hibás</span>';
+
+                row.innerHTML = `
+                    <td>${formatDate(pairing.timestamp)}</td>
+                    <td>${pairing.munka_id || '-'}</td>
+                    <td>${pairing.megrendeles_id || '-'}</td>
+                    <td>${pairing.muvelet_id}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button class="action-btn" onclick="viewDetails('${pairing.id}')">👁️ Részletek</button>
+                        <button class="action-btn delete" onclick="deletePairing('${pairing.id}')">🗑️</button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+
+            updateStats();
+        }
+
+        function applyFilters() {
+            const dateFilter = document.getElementById('filterDate').value;
+            const munkaFilter = document.getElementById('filterMunka').value.toLowerCase();
+            const megrendelesFilter = document.getElementById('filterMegrendeles').value.toLowerCase();
+            const statusFilter = document.getElementById('filterStatus').value;
+
+            filteredPairings = allPairings.filter(p => {
+                let match = true;
+
+                if (dateFilter) {
+                    const pairingDate = p.timestamp.toDate ? p.timestamp.toDate() : new Date(p.timestamp);
+                    const filterDate = new Date(dateFilter);
+                    match = match && pairingDate.toDateString() === filterDate.toDateString();
+                }
+
+                if (munkaFilter) {
+                    match = match && (p.munka_id || '').toLowerCase().includes(munkaFilter);
+                }
+
+                if (megrendelesFilter) {
+                    match = match && (p.megrendeles_id || '').toLowerCase().includes(megrendelesFilter);
+                }
+
+                if (statusFilter) {
+                    match = match && p.match_status === statusFilter;
+                }
+
+                return match;
+            });
+
+            renderTable();
+        }
+
+        window.viewDetails = function(id) {
+            const pairing = allPairings.find(p => p.id === id);
+            if (!pairing) return;
+
+            const details = `
+ID: ${id}
+Munka: ${pairing.munka_id}
+Megrendelés: ${pairing.megrendeles_id}
+Művelet: ${pairing.muvelet_id}
+DataMatrix: ${pairing.datamatrix}
+Code128: ${pairing.code128}
+Státusz: ${pairing.match_status}
+${pairing.error_message ? 'Hiba: ' + pairing.error_message : ''}
+Időpont: ${formatDate(pairing.timestamp)}
+${pairing.elapsed_seconds ? 'Párosítási idő: ' + pairing.elapsed_seconds + 's' : ''}
+            `;
+
+            alert(details);
+        };
+
+        window.deletePairing = async function(id) {
+            if (!confirm('Biztosan törölni szeretnéd ezt a párosítást?')) return;
+
+            try {
+                await window.deleteDoc(window.doc(window.db, 'pairings', id));
+                allPairings = allPairings.filter(p => p.id !== id);
+                applyFilters();
+                alert('✅ Párosítás törölve!');
+            } catch (error) {
+                console.error('Törlési hiba:', error);
+                alert('❌ Hiba történt a törlés során!');
+            }
+        };
+
+        function exportToCSV() {
+            if (filteredPairings.length === 0) {
+                alert('Nincs exportálható adat!');
+                return;
+            }
+
+            const headers = ['Dátum/Idő', 'Munka ID', 'Megrendelés ID', 'Művelet', 'DataMatrix', 'Code128', 'Státusz', 'Hiba', 'Párosítási idő (s)'];
+            const rows = filteredPairings.map(p => [
+                formatDate(p.timestamp),
+                p.munka_id || '',
+                p.megrendeles_id || '',
+                p.muvelet_id,
+                p.datamatrix || '',
+                p.code128 || '',
+                p.match_status,
+                p.error_message || '',
+                p.elapsed_seconds || ''
+            ]);
+
+            let csv = headers.join(';') + '\n';
+            rows.forEach(row => {
+                csv += row.map(cell => `"${cell}"`).join(';') + '\n';
+            });
+
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `parositas_export_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+        }
+
+        // Event listeners
+        document.getElementById('filterDate').addEventListener('change', applyFilters);
+        document.getElementById('filterMunka').addEventListener('input', applyFilters);
+        document.getElementById('filterMegrendeles').addEventListener('input', applyFilters);
+        document.getElementById('filterStatus').addEventListener('change', applyFilters);
+
+        document.getElementById('refreshBtn').addEventListener('click', loadPairings);
+        document.getElementById('exportBtn').addEventListener('click', exportToCSV);
+        document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+            document.getElementById('filterDate').value = '';
+            document.getElementById('filterMunka').value = '';
+            document.getElementById('filterMegrendeles').value = '';
+            document.getElementById('filterStatus').value = '';
+            filteredPairings = [...allPairings];
+            renderTable();
         });
     </script>
 </body>
