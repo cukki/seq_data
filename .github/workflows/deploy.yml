@@ -21,22 +21,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: .
-```
-
-**FONTOS:**
-- NE nyomj TAB-ot, csak SPACE!
-- Másolás után nézd meg nincs-e extra sor a végén
-
----
-
-### **4. Commit:**
-```
-Commit new file
-```
-
----
-
-### **5. Ellenőrzés:**
-```
-Actions → Legutóbbi workflow
-→ ✅ vagy ❌?
